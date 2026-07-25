@@ -1,0 +1,18 @@
+# Generated render output — the scripts in tests/render are committed, the images they
+# produce are not. Regenerate with: python3 tests/render/full_plate.py
+tests/render/*.png
+tests/render/*.ppm
+tests/render/geom.json
+
+# Python bytecode from the offline rasteriser
+__pycache__/
+*.pyc
+
+# Editor / OS noise
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# There are no dependencies. If node_modules appears, something has gone wrong.
+node_modules/

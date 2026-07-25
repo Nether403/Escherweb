@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" data-state="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regular Division of the Plane — M.C. Escher</title>
+<meta name="description" content="Eight plates in impossible geometry: Penrose stairs, hyperbolic infinity, figure-ground inversion, and a print that contains itself.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;1,6..96,400&family=Spectral:ital,wght@0,300;0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   REGULAR DIVISION OF THE PLANE
+   Ink-on-paper print room. All colour flows through these
+   custom properties so the Day/Night inversion (Plate V) can
+   swap the entire press with one attribute.
+   ============================================================ */
+:root{
+  --paper:#EAE2CF; --paper-2:#DFD5BE; --paper-3:#D2C6AB;
+  --ink:#17140F;   --ink-2:#3A332A;
+  --bistre:#7A5330; --bistre-2:#A97F52;
+  --vermilion:#B4301D; --teal:#1D6A68; --gold:#A8862B;
+
+  --font-display:'Bodoni Moda',Didot,'Times New Roman',serif;
+  --font-body:'Spectral',Georgia,serif;
+  --font-mono:'Space Mono',ui-monospace,monospace;
+
+  --rule:color-mix(in srgb, var(--ink) 22%, var(--paper));
+  --rule-2:color-mix(in srgb, var(--ink) 12%, var(--paper));
+  --measure:34rem;
+  --gut:clamp(1.1rem,4vw,3.5rem);
+}
+/* The Day/Night inversion. Same plates, opposite press. */
+:root[data-state="night"]{
+  --paper:#14120E; --paper-2:#1D1A14; --paper-3:#29241B;
+  --ink:#E9E1CE;   --ink-2:#BEB29A;
+  --bistre:#C08F5A; --bistre-2:#8A6438;
+  --vermilion:#D9503A; --teal:#43A29E; --gold:#C9A63F;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--font-body);font-weight:300;
+  font-size:clamp(1rem,.55vw + .9rem,1.12rem);line-height:1.66;
+  -webkit-font-smoothing:antialiased;
+  transition:background-color .7s ease,color .7s ease;
+  overflow-x:hidden;
+}
+/* Laid-paper grain. feTurbulence, so it costs one data URI and no request. */
+body::before{
+  content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  opacity:.42;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+:root[data-state="night"] body::before{mix-blend-mode:screen;opacity:.2}
+
+a{color:inherit}
+:focus-visible{outline:2px solid var(--vermilion);outline-offset:3px}
+.skip{
+  position:absolute;left:-9999px;top:0;z-index:10000;
+  background:var(--ink);color:var(--paper);padding:.7rem 1.1rem;
+  font-family:var(--font-mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+}
+.skip:focus{left:.5rem;top:.5rem}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- shared engraver's chrome ---------- */
+.mono{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2)}
+.rule{height:1px;background:var(--rule);border:0;margin:0}
+
+/* ---------- Möbius navigation band ----------
+   Eight plates on a band with one full twist. The plate
+   diametrically opposite the one you are reading hangs upside
+   down; walk the band far enough and the last plate precedes
+   the first. Focus or hover brings any label upright, so the
+   illusion never becomes a trap. */
+.mobius{
+  position:fixed;top:0;left:0;right:0;z-index:900;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(7px) saturate(120%);
+  border-bottom:1px solid var(--rule);
+  transition:background-color .7s ease;
+}
+.mobius__inner{
+  max-width:82rem;margin:0 auto;padding:.5rem var(--gut);
+  display:flex;align-items:center;gap:1rem;
+}
+.mobius__sig{
+  font-family:var(--font-display);font-size:.94rem;font-weight:500;
+  letter-spacing:.02em;white-space:nowrap;text-decoration:none;flex:0 0 auto;
+}
+.mobius__sig i{font-style:italic;opacity:.6}
+.mobius__band{
+  flex:1 1 auto;min-width:0;position:relative;height:2.4rem;
+  perspective:620px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+}
+.mobius__track{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  gap:.15rem;transform-style:preserve-3d;
+}
+.mobius__lnk{
+  flex:0 0 auto;display:block;padding:.34rem .62rem;text-decoration:none;
+  font-family:var(--font-mono);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;
+  white-space:nowrap;color:var(--ink-2);
+  transform-style:preserve-3d;backface-visibility:visible;
+  transition:transform .55s cubic-bezier(.4,.1,.2,1),opacity .55s ease,color .3s ease;
+}
+.mobius__lnk b{font-weight:400;color:var(--ink);opacity:.55;margin-right:.4em}
+.mobius__lnk[aria-current="true"]{color:var(--ink)}
+.mobius__lnk[aria-current="true"] b{color:var(--vermilion);opacity:1}
+.mobius__lnk:hover,.mobius__lnk:focus-visible{transform:none!important;opacity:1!important;color:var(--ink)}
+.mobius__exit{
+  flex:0 0 auto;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.14em;
+  text-transform:uppercase;text-decoration:none;color:var(--ink-2);
+  border:1px solid var(--rule);padding:.36rem .6rem;border-radius:1px;
+}
+.mobius__exit:hover{color:var(--paper);background:var(--ink);border-color:var(--ink)}
+@media (max-width:860px){
+  .mobius__band{display:none}
+  .mobius__inner{justify-content:space-between}
+}
+@media (prefers-reduced-motion:reduce){
+  .mobius__lnk{transform:none!important;opacity:1!important;transition:none}
+}
+
+/* ---------- Penrose scroll meter ----------
+   Climbs as you descend the page. Always reads ∞ / ∞. */
+.meter{
+  position:fixed;right:calc(var(--gut) * .5);top:50%;transform:translateY(-50%);
+  z-index:880;display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  pointer-events:none;
+}
+.meter__num{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;color:var(--ink-2);writing-mode:vertical-rl}
+@media (max-width:1180px){.meter{display:none}}
+
+/* ---------- plate scaffolding ---------- */
+main{position:relative;z-index:1}
+.hero-wrap{padding-top:3rem}
+.plate{position:relative;padding:clamp(3.5rem,9vw,7.5rem) 0 clamp(2.5rem,6vw,5rem)}
+.plate__frame{
+  max-width:78rem;margin:0 auto;padding:0 var(--gut);position:relative;
+}
+/* Registration crosses — the printer's alignment marks. */
+.reg{position:absolute;width:13px;height:13px;opacity:.5;pointer-events:none;color:var(--bistre)}
+.reg::before,.reg::after{content:'';position:absolute;background:currentColor}
+.reg::before{left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px)}
+.reg::after{top:50%;left:0;right:0;height:1px;transform:translateY(-.5px)}
+.reg--tl{top:0;left:calc(var(--gut) - 16px)}
+.reg--tr{top:0;right:calc(var(--gut) - 16px)}
+.reg--bl{bottom:0;left:calc(var(--gut) - 16px)}
+.reg--br{bottom:0;right:calc(var(--gut) - 16px)}
+@media (max-width:700px){.reg{display:none}}
+
+/* The seam between plates: a hairline and a tessellation motif. */
+.seam{display:flex;align-items:center;gap:1rem;max-width:78rem;margin:0 auto;padding:0 var(--gut)}
+.seam__line{flex:1;height:1px;background:var(--rule-2)}
+.seam__mark{flex:0 0 auto;color:var(--bistre);opacity:.7}
+
+/* ---------- colophon ---------- */
+.colophon{
+  border-top:1px solid var(--rule);margin-top:4rem;
+  padding:clamp(3rem,7vw,6rem) 0 4rem;background:var(--paper-2);
+  transition:background-color .7s ease;
+}
+.colophon__in{max-width:78rem;margin:0 auto;padding:0 var(--gut)}
+.colophon__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:clamp(1.6rem,4vw,3.2rem);align-items:start}
+.colophon h2{
+  font-family:var(--font-display);font-weight:400;font-size:clamp(1.7rem,4vw,2.6rem);
+  line-height:1.08;margin:0 0 1.2rem;letter-spacing:-.01em;
+}
+.colophon h3{font-family:var(--font-mono);font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--bistre);margin:0 0 .8rem;font-weight:700}
+.colophon p{margin:0 0 .9rem;max-width:var(--measure);font-size:.95rem;color:var(--ink-2)}
+.colophon dl{margin:0;font-family:var(--font-mono);font-size:.63rem;letter-spacing:.08em;line-height:1.9;text-transform:uppercase;color:var(--ink-2)}
+.colophon dt{color:var(--bistre);display:inline}
+.colophon dd{display:inline;margin:0 0 0 .5em}
+.colophon dd::after{content:'';display:block}
+blockquote.epi{
+  margin:0 0 1.6rem;padding-left:1.1rem;border-left:2px solid var(--vermilion);
+  font-family:var(--font-body);font-style:italic;font-size:1.02rem;color:var(--ink);
+}
+blockquote.epi cite{display:block;margin-top:.5rem;font-style:normal;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+
+/* The paired controls. Both deliver you to the same landing. */
+.stair-exit{display:flex;flex-wrap:wrap;gap:.7rem;margin:1.6rem 0 0}
+.btn{
+  font-family:var(--font-mono);font-size:.63rem;letter-spacing:.16em;text-transform:uppercase;
+  background:transparent;color:var(--ink);border:1px solid var(--ink);
+  padding:.7rem 1.1rem;border-radius:1px;cursor:pointer;text-decoration:none;display:inline-block;
+  transition:background-color .25s ease,color .25s ease;
+}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn--ghost{border-color:var(--rule);color:var(--ink-2)}
+.btn--ghost:hover{background:var(--bistre);border-color:var(--bistre);color:var(--paper)}
+.foot-note{margin-top:2.4rem;padding-top:1.2rem;border-top:1px solid var(--rule);font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;line-height:1.9;text-transform:uppercase;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;justify-content:space-between}
+
+/* Plate modules inject their own scoped CSS below this line. */
+/*MODULE_CSS*/
+</style>
+</head>
+<body>
+<a class="skip" href="#colophon">Skip the loop — go to the colophon</a>
+
+<!-- ============ MÖBIUS BAND ============ -->
+<nav class="mobius" aria-label="Plates">
+  <div class="mobius__inner">
+    <a class="mobius__sig" href="#plate-1"><i>M.C.</i> ESCHER</a>
+    <div class="mobius__band" id="band">
+      <div class="mobius__track" id="track"></div>
+    </div>
+    <a class="mobius__exit" href="#colophon">Exit the loop</a>
+  </div>
+</nav>
+
+<!-- ============ PENROSE METER ============ -->
+<div class="meter" aria-hidden="true">
+  <svg id="meterSvg" width="34" height="150" viewBox="0 0 34 150" fill="none"></svg>
+  <span class="meter__num" id="meterNum">∞ / ∞</span>
+</div>
+
+<main id="main">
+  <div class="hero-wrap"></div>
+  <!--PLATE_SECTIONS-->
+</main>
+
+<!-- ============ COLOPHON ============ -->
+<footer class="colophon" id="colophon">
+  <div class="colophon__in">
+    <div class="colophon__grid">
+      <div>
+        <h2>Colophon</h2>
+        <blockquote class="epi">
+          “Are you really sure that a floor cannot also be a ceiling?”
+          <cite>— M.C. Escher</cite>
+        </blockquote>
+        <blockquote class="epi">
+          “We adore chaos because we love to produce order.”
+          <cite>— M.C. Escher</cite>
+        </blockquote>
+        <blockquote class="epi">
+          “Only those who attempt the absurd will achieve the impossible.”
+          <cite>— M.C. Escher</cite>
+        </blockquote>
+      </div>
+      <div>
+        <h3>On this suite</h3>
+        <p>
+          Eight plates, drawn for the screen rather than the stone. Every stair, tile,
+          tribar and disc here is constructed in markup — original geometry in Escher's
+          grammar, computed rather than reproduced. No print of his is copied or embedded;
+          his actual work remains with the M.C. Escher heritage.
+        </p>
+        <p>
+          Maurits Cornelis Escher was born in Leeuwarden in 1898 and died in 1972. He
+          wanted to be an architect, and instead learned woodcut, etching and linocut
+          under Samuel Jessurun de Mesquita in Haarlem until 1922. The stairs came from
+          Penrose; the hyperbolic disc came from a diagram sent by the geometer
+          H.S.M. Coxeter. He was, as one curator put it, loved by the mathematicians
+          and the hippies alike.
+        </p>
+      </div>
+      <div>
+        <h3>Impression</h3>
+        <dl>
+          <dt>Suite</dt><dd>Regular Division of the Plane</dd>
+          <dt>Plates</dt><dd>Eight, I–VIII</dd>
+          <dt>Medium</dt><dd>Vector engraving on screen</dd>
+          <dt>State</dt><dd>Second state, day &amp; night</dd>
+          <dt>Edition</dt><dd>∞ / ∞</dd>
+          <dt>Press</dt><dd>Hand-set markup, no library</dd>
+          <dt>Signed</dt><dd>In the plate</dd>
+        </dl>
+        <div class="stair-exit">
+          <a class="btn" href="#plate-1" data-landing>Ascend</a>
+          <a class="btn" href="#plate-1" data-landing>Descend</a>
+        </div>
+        <p style="margin-top:.8rem;font-size:.8rem;font-style:italic">
+          Both doors open on the same landing.
+        </p>
+      </div>
+    </div>
+    <div class="foot-note">
+      <span>Regular Division of the Plane — eight plates in impossible geometry</span>
+      <span>A new work in Escher's idiom, not a reproduction</span>
+      <span id="motionNote"></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   THE PRESS — shell runtime.
+   Implements exactly the api surface the eight plate modules
+   consume: svg, raf, onVisible, reducedMotion, state,
+   onStateChange, reduceLabel. Nothing more, nothing less.
+   ============================================================ */
+(function(){
+  'use strict';
+
+  var PLATES=[
+    {n:'I',   slug:'ascending',      global:'EscherPlate1', label:'Ascending and Descending'},
+    {n:'II',  slug:'plane-division', global:'EscherPlate2', label:'Regular Division'},
+    {n:'III', slug:'relativity',     global:'EscherPlate3', label:'Relativity'},
+    {n:'IV',  slug:'print-gallery',  global:'EscherPlate4', label:'Print Gallery'},
+    {n:'V',   slug:'day-and-night',  global:'EscherPlate5', label:'Day and Night'},
+    {n:'VI',  slug:'drawing-hands',  global:'EscherPlate6', label:'Drawing Hands'},
+    {n:'VII', slug:'waterfall',      global:'EscherPlate7', label:'Waterfall'},
+    {n:'VIII',slug:'circle-limit',   global:'EscherPlate8', label:'Circle Limit'}
+  ];
+
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var docEl = document.documentElement;
+
+  /* ---- state: the html attribute is the single source of truth ---- */
+  var stateSubs=[];
+  function currentState(){ return docEl.dataset.state === 'night' ? 'night' : 'day'; }
+  new MutationObserver(function(muts){
+    for(var i=0;i<muts.length;i++){
+      if(muts[i].attributeName==='data-state'){
+        var s=currentState();
+        stateSubs.slice().forEach(function(cb){ try{ cb(s); }catch(e){} });
+        break;
+      }
+    }
+  }).observe(docEl,{attributes:true,attributeFilter:['data-state']});
+
+  /* ---- the api handed to every module ---- */
+  function makeApi(){
+    var api={
+      reducedMotion: reduced,
+      svg: function(tag,attrs,parent){
+        var el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+        if(attrs) for(var k in attrs){ if(Object.prototype.hasOwnProperty.call(attrs,k) && attrs[k]!=null) el.setAttribute(k,attrs[k]); }
+        if(parent) parent.appendChild(el);
+        return el;
+      },
+      raf: function(tick){
+        var id=null,last=0,running=false;
+        function frame(ts){
+          if(!running) return;
+          if(!last) last=ts;
+          var dt=ts-last; last=ts;
+          if(dt>64) dt=64;              /* cap: a backgrounded tab must not lurch */
+          try{ tick(dt,ts); }catch(e){ running=false; return; }
+          id=requestAnimationFrame(frame);
+        }
+        return {
+          start:function(){ if(running) return; running=true; last=0; id=requestAnimationFrame(frame); },
+          stop:function(){ running=false; if(id) cancelAnimationFrame(id); id=null; },
+          get running(){ return running; }
+        };
+      },
+      onVisible: function(el,onEnter,onExit){
+        if(!('IntersectionObserver' in window)){ if(onEnter) onEnter(); return function(){}; }
+        var io=new IntersectionObserver(function(es){
+          for(var i=0;i<es.length;i++){
+            if(es[i].isIntersecting){ if(onEnter) onEnter(); } else { if(onExit) onExit(); }
+          }
+        },{rootMargin:'120px 0px',threshold:0.01});
+        io.observe(el);
+        return function(){ io.disconnect(); };
+      },
+      onStateChange: function(cb){
+        stateSubs.push(cb);
+        return function(){ var i=stateSubs.indexOf(cb); if(i>-1) stateSubs.splice(i,1); };
+      },
+      reduceLabel: function(){}
+    };
+    Object.defineProperty(api,'state',{get:currentState,enumerable:true});
+    return api;
+  }
+
+  /* ---- inject each module's scoped CSS FIRST.
+         Must precede mounting: plates that size a canvas measure
+         their host on mount and would read zero without layout. ---- */
+  (function(){
+    var css='';
+    PLATES.forEach(function(p){
+      var mod=window[p.global];
+      if(!mod||!mod.css) return;
+      css += Array.isArray(mod.css) ? mod.css.join('\n') : String(mod.css);
+      css += '\n';
+    });
+    if(!css) return;
+    var tag=document.createElement('style');
+    tag.textContent=css;
+    document.head.appendChild(tag);
+  })();
+
+  /* ---- then pull the impressions ---- */
+  var mounted=[];
+  PLATES.forEach(function(p){
+    var host=document.getElementById('mount-'+p.slug);
+    var mod=window[p.global];
+    if(!host) return;
+    if(!mod||typeof mod.mount!=='function'){
+      host.innerHTML='<p class="mono" style="padding:2rem 0">Plate '+p.n+' failed to load.</p>';
+      return;
+    }
+    try{
+      var inst=mod.mount(host,makeApi());
+      mounted.push({plate:p,inst:inst});
+    }catch(err){
+      host.innerHTML='<p class="mono" style="padding:2rem 0">Plate '+p.n+' could not be pulled.</p>';
+      if(window.console) console.error('[plate '+p.n+']',err);
+    }
+  });
+
+  /* ============================================================
+     MÖBIUS BAND
+     Eight labels on a band carrying one full twist. Signed
+     cyclic distance from the plate you are reading drives
+     rotateX, so the plate opposite yours hangs inverted and the
+     band has neither a first nor a last entry.
+     ============================================================ */
+  var track=document.getElementById('track');
+  var links=[];
+  PLATES.forEach(function(p,i){
+    var a=document.createElement('a');
+    a.className='mobius__lnk';
+    a.href='#plate-'+(i+1);
+    a.innerHTML='<b>'+p.n+'</b>'+p.label;
+    a.setAttribute('aria-label','Plate '+p.n+' — '+p.label);
+    track.appendChild(a);
+    links.push(a);
+  });
+
+  var active=0;
+  function twist(){
+    var N=PLATES.length, half=N/2;
+    links.forEach(function(a,i){
+      var d=i-active;
+      /* shortest signed cyclic distance, so the band wraps both ways */
+      if(d> half) d-=N;
+      if(d<-half) d+=N;
+      var deg=d*(360/N);                 /* ±180° at the far side = upside down */
+      var fade=1-Math.min(Math.abs(d)/half,1)*0.55;
+      a.style.transform=reduced?'none':'rotateX('+deg+'deg)';
+      a.style.opacity=reduced?1:fade.toFixed(3);
+      a.setAttribute('aria-current', i===active ? 'true' : 'false');
+    });
+  }
+
+  /* ---- which plate am I in? drives the band + the meter ---- */
+  var sections=PLATES.map(function(p,i){ return document.getElementById('plate-'+(i+1)); }).filter(Boolean);
+  if('IntersectionObserver' in window){
+    var seen=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        var idx=sections.indexOf(e.target);
+        if(idx>-1 && idx!==active){ active=idx; twist(); }
+      });
+    },{rootMargin:'-45% 0px -45% 0px',threshold:0});
+    sections.forEach(function(s){ seen.observe(s); });
+  }
+  twist();
+
+  /* ============================================================
+     PENROSE METER — climbs as you descend. Reads ∞ / ∞ always.
+     ============================================================ */
+  (function(){
+    var svg=document.getElementById('meterSvg');
+    if(!svg) return;
+    var STEPS=7, W=34, H=150, sw=9, sh=H/(STEPS+1);
+    for(var i=0;i<STEPS;i++){
+      var y=H-(i+1)*sh, x=4+(i%3)*3;
+      var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+      var tread=document.createElementNS('http://www.w3.org/2000/svg','path');
+      tread.setAttribute('d','M'+x+' '+y+' l'+sw+' -4 l'+sw+' 4 l-'+sw+' 4 Z');
+      tread.setAttribute('fill','var(--paper-2)');
+      tread.setAttribute('stroke','var(--ink)');
+      tread.setAttribute('stroke-width','.7');
+      g.appendChild(tread);
+      svg.appendChild(g);
+    }
+    var mark=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    mark.setAttribute('r','2.6'); mark.setAttribute('fill','var(--vermilion)');
+    svg.appendChild(mark);
+    var num=document.getElementById('meterNum');
+
+    function place(){
+      var max=document.documentElement.scrollHeight-window.innerHeight;
+      var prog=max>0?Math.min(Math.max(window.scrollY/max,0),1):0;
+      var i=Math.min(Math.floor(prog*STEPS),STEPS-1);
+      var y=H-(i+1)*sh, x=4+(i%3)*3;
+      mark.setAttribute('cx',x+sw); mark.setAttribute('cy',y-4);
+      /* The count climbs. The total never moves. */
+      num.textContent='∞ / ∞';
+    }
+    var ticking=false;
+    window.addEventListener('scroll',function(){
+      if(ticking) return; ticking=true;
+      requestAnimationFrame(function(){ place(); ticking=false; });
+    },{passive:true});
+    window.addEventListener('resize',place,{passive:true});
+    place();
+  })();
+
+  /* ---- Ascend / Descend: both land in the same place ---- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-landing]'),function(a){
+    a.addEventListener('click',function(){
+      /* no trickery needed — they simply share a destination */
+    });
+  });
+
+  if(reduced){
+    var mn=document.getElementById('motionNote');
+    if(mn) mn.textContent='Reduced motion honoured — plates shown at rest';
+  }
+})();
+</script>
+<!--MODULES-->
+</body>
+</html>
